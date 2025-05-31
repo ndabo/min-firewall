@@ -1,0 +1,12 @@
+
+---
+
+##  `requirements.txt`
+
+```txt
+fastapi
+uvicorn
+requests
+python-dotenv
+tiktoken
+pydantic
