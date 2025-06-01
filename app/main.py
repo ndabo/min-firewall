@@ -1,15 +1,16 @@
 """
 FastAPI application for managing firewall rules.
 """
+from typing import Dict, List
+import os
 import time
 from fastapi import FastAPI, Request, HTTPException, status
 from fastapi.responses import JSONResponse
-from typing import Dict, List
-from filters import is_blocked
-from proxy import forward_to_model
-from logger import get_logger
+from app.filters import is_blocked
+from app.proxy import forward_to_model
+import app.proxy as proxy_module
+from app.logger import get_logger
 from dotenv import load_dotenv
-import os
 
 load_dotenv()
 
@@ -17,15 +18,16 @@ load_dotenv()
 app = FastAPI(title = "Model Inference Firewall (MIF)")
 
 logger = get_logger("mif_firewall")
-# configuration
-HF_API_KEY = os.getenv("HF_API_KEY")
-MODEL = "gpt2"
-HEADERS = {
-    "Authorization": f"Bearer {HF_API_KEY}",
-    "Content-Type": "application/json"
-}
+# # configuration
+# HF_API_KEY = os.getenv("HF_API_KEY")
+# MODEL = "gpt2"
+# HEADERS = {
+#     "Authorization": f"Bearer {HF_API_KEY}",
+#     "Content-Type": "application/json"
+# }
 
-HF_API_URL = f"https://api-inference.huggingface.co/models/{MODEL}"
+# HF_API_URL = os.getenv("TARGET_MODEL_URL",
+#                         "https://router.huggingface.co/fireworks-ai/inference/v1/chat/completions")
 
 
 # ------------------------
@@ -77,7 +79,7 @@ async def proxy_to_hf(request: Request):
             status_code = status.HTTP_400_BAD_REQUEST,
             detail = "Request must be valid json" 
         )
-    prompt = body.get("prompt") or body.get("messages") or None
+    prompt = body.get("prompt") or body.get("messages") or body.get("inputs") or None
     #Normalize: if the user uses `messages` (chat format), stringify for filtering
     if isinstance(prompt,list):
         prompt_txt = " ".join(item.get("content","") for item in prompt)
@@ -108,7 +110,7 @@ async def proxy_to_hf(request: Request):
 
     # --- Forward to actual model endpoint ---
     try:
-        model_response = await forward_to_model(body, dict(request.headers))
+        model_response = await proxy_module.forward_to_model(body, dict(request.headers))
     except HTTPException as e:
         # Already logged/constructed by forward_to_model
         raise e

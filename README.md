@@ -68,3 +68,8 @@ Created by N’Famara Dabo | CS + Econ @ Brown University
 
 
 
+
+
+curl -X POST http://localhost:8000/infer \
+  -H "Content-Type: application/json" \
+  -d '{"inputs": "Hello, how are you?"}'
