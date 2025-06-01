@@ -18,17 +18,6 @@ load_dotenv()
 app = FastAPI(title = "Model Inference Firewall (MIF)")
 
 logger = get_logger("mif_firewall")
-# # configuration
-# HF_API_KEY = os.getenv("HF_API_KEY")
-# MODEL = "gpt2"
-# HEADERS = {
-#     "Authorization": f"Bearer {HF_API_KEY}",
-#     "Content-Type": "application/json"
-# }
-
-# HF_API_URL = os.getenv("TARGET_MODEL_URL",
-#                         "https://router.huggingface.co/fireworks-ai/inference/v1/chat/completions")
-
 
 # ------------------------
 # 1) Simple in-memory rate limiter

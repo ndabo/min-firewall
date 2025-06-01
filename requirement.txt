@@ -8,5 +8,6 @@ fastapi
 uvicorn
 requests
 python-dotenv
-tiktoken
-pydantic
+httpx
+pytest
+
