@@ -4,12 +4,10 @@ Log requests and threats
 - Threats are logged at the WARNING level.
 - Logs are saved to mif_logs.log file
 """
-import csv
-from datetime import datetime
 import logging
 from logging.handlers import RotatingFileHandler
 import pathlib
-import sys
+
 
 # Create logs directory if it doesn't exist
 LOG_DIR = pathlib.Path(__file__).parent.parent / "logs"
@@ -19,6 +17,11 @@ LOG_FILE = LOG_DIR / "mif-firewall.log"
 #ncoming requests (with IP, prompt, timestamp, etc.) are logged at the INFO level.
 # Threats are logged at the WARNING level.
 def get_logger(name:str)->logging.Logger:
+    """
+    Create and configure a logger for the MIF firewall.
+    - Logs are saved to mif_logs.log file
+    - Rotating file handler with max size 10MB and 3 backups
+    """
     logger = logging.getLogger(name)
     #avoid duplicate handlers
     if logger.hasHandlers():

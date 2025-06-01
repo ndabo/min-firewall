@@ -8,23 +8,26 @@ _ Provides a function is_blocked(prompt: str) → bool that returns True if any 
 import re
 from typing import Tuple, Optional
 
+
 FORBIDDEN_WORDS = [
     "ignore previous",
     "disregard all",
     "you are a",
     "bypass",
-    "override"
+    "override",
+    "disable",
+    "shutdown",
 ]
 
-FORBIDDEN_PATTERNS = [
-    r"(\d{3}-\d{2}-\d{4})|(\d{16})|(\b\d{5}(?:-\d{4})?\b)"  # SSN, credit card, ZIP
-    r"(\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b)"  # Email
+FORBIDDEN_PATTERNS = {
+    re.compile(r"(\d{3}-\d{2}-\d{4})|(\d{16})|(\b\d{5}(?:-\d{4})?\b)") , # SSN, credit card, ZIP
+    re.compile(r"(\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b)") , # Email
     re.compile(r"\bshutdown system\b", flags=re.IGNORECASE), #shutdown system
     re.compile(r"\bdelete all data\b", flags=re.IGNORECASE), #delete all data
     re.compile(r"\bpassword\b.*\badmin\b", flags=re.IGNORECASE),  # e.g. “What’s the admin password?”
     re.compile(r"\b(?:what's|what is) the admin password\b", flags=re.IGNORECASE), #what’s the admin password
     re.compile(r"\b(?:what's|what is) the admin password\b", flags=re.IGNORECASE), #what’s the admin password
-]
+}
 
 def is_blocked(prompt: str) -> Tuple[bool, Optional[str]]:
     """
