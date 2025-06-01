@@ -34,6 +34,7 @@ Content-Type: application/json
 
 #### Response:
 
+```http
 HTTP/1.1 403 Forbidden
 Content-Type: application/json
 
@@ -41,15 +42,19 @@ Content-Type: application/json
   "error": "Prompt blocked by MIF",
   "reason": "Prompt matches forbidden pattern: '\\bdelete all data\\b'"
 }
+```
 
 #### Sample Allowed Request (forwarded)
 
+```http
 curl -X POST http://localhost:8000/infer \
   -H "Content-Type: application/json" \
   -d '{"inputs": "Hello, how are you?"}'
+```
 
 #### Response (proxied from Hunging Face):
 
+```http
 {
   "id": "chatcmpl-...",
   "object": "chat.completion",
@@ -68,9 +73,11 @@ curl -X POST http://localhost:8000/infer \
     "total_tokens": 60
   }
 }
+```
 
 #### Project Structure
 
+```http
 mif-firewall/
 ├── app/
 │   ├── __init__.py        # Marks this directory as a Python package
@@ -83,6 +90,7 @@ mif-firewall/
 ├── logs/                  # Automatically created at runtime; contains mif-firewall.log
 ├── requirements.txt       # Python dependencies (FastAPI, HTTPX, pytest, etc.)
 └── README.md              # This file
+```
 
 1. app/main.py
 - Implements /infer POST endpoint
@@ -115,18 +123,23 @@ mif-firewall/
 ## Installation
 
 1. clone the repo
+```http
   git clone https://github.com/ndabo/mif-firewall.git
   cd mif-firewall
+```
 
 2. Create a virtual environment and install dependencies:
+
+```http
   python3 -m venv venv
   source venv/bin/activate
   pip install --upgrade pip
   pip install -r requirements.txt
-
+```
 3. If you plan to modify the code, install the dev requirements as well:
+```http
     pip install pytest httpx
-
+```
 ## Configuration
 
 * TARGET_MODEL_URL:
@@ -137,29 +150,34 @@ mif-firewall/
 
 * Rate Limiting:
   In app/main.py, you’ll find:
+    ```http
     RATE_LIMIT = 10        # max requests per window  
     RATE_WINDOW = 60       # window in seconds
+    ```
   Adjust these constants (or convert them to environment variables) to change the behavior.
 
 
 ## Running the App
 
-- Activate your venv first (if you haven’t already)
+```http
+#Activate your venv first (if you haven’t already)
 source venv/bin/activate
 
-- (Optional) Set the model endpoint you want to proxy to
+#(Optional) Set the model endpoint you want to proxy to
 export TARGET_MODEL_URL="https://your-api/v1/chat/completions"
 
-- Start the FastAPI server
+#Start the FastAPI server
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
 
 The firewall will now listen on http://0.0.0.0:8000/infer.
 Logs (INFO+ and WARNINGS) appear in your console and are also written to logs/mif-firewall.log.
 
 ## Running the test
 in your terminal from the project root run:
+```http
 pytest -q
-
+```
 If any test fails, you’ll see which assertion or import caused the error.
 Make sure app/__init__.py exists so that pytest can resolve from app.main import.
 
