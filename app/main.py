@@ -2,15 +2,14 @@
 FastAPI application for managing firewall rules.
 """
 from typing import Dict, List
-import os
 import time
+from dotenv import load_dotenv
 from fastapi import FastAPI, Request, HTTPException, status
 from fastapi.responses import JSONResponse
 from app.filters import is_blocked
-from app.proxy import forward_to_model
+
 import app.proxy as proxy_module
 from app.logger import get_logger
-from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -52,9 +51,9 @@ def is_rate_limited(client_ip: str) -> bool:
 @app.post("/infer")
 async def proxy_to_hf(request: Request):
     """
-    Proxy the request to the OpenAI API.
+    Proxy the request to the Hugging Face.
     - Parse JSON payload
-    - Rate‐limit by client IP
+    - Rate‐limit by client IP To avoid abuse, DDOS attacks
     - Filter prompt
     - Log request
     - Forward to model
@@ -79,7 +78,7 @@ async def proxy_to_hf(request: Request):
     
     # --- Rate limiting ---
     if is_rate_limited(client_ip):
-        logger.warning(f"Rate limit exceeded for IP {client_ip}.")
+        logger.warning("Rate limit exceeded for IP %s.", client_ip)
         raise HTTPException(
             status_code = status.HTTP_429_TOO_MANY_REQUESTS,
             detail = "Rate limit exceeded. Please try again later."
@@ -88,14 +87,17 @@ async def proxy_to_hf(request: Request):
      # --- Prompt filtering ---
     blocked, reason = is_blocked(prompt_txt)
     if blocked:
-        logger.warning(f"Blocked request from IP {client_ip}: {reason} -- Prompt: {prompt_txt!r}")
+        logger.warning(
+            "Blocked request from IP %s: %s -- Prompt: %r",
+            client_ip, reason, prompt_txt
+        )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"error": "Prompt blocked by MIF", "reason": reason}
         )
     
     # --- Log the allowed request at INFO ---
-    logger.info(f"Allowed request from IP {client_ip}: prompt_preview={prompt_txt[:50]!r}")
+    logger.info("Allowed request from IP %s: prompt_preview=%r", client_ip, prompt_txt[:50])
 
     # --- Forward to actual model endpoint ---
     try:

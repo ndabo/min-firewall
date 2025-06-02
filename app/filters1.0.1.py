@@ -3,15 +3,16 @@ this is a simple PII detection filter using spaCy.
 It detects entities like PERSON, GPE, LOC, ORG, DATE, CARDINAL, MONEY.
 It can be extended with regex patterns for SSN, credit card numbers, etc.
 """
+import re
 from typing import Optional, Tuple
 import spacy
 # from detoxify import Detoxify
-import re
 
 JAILBREAK_PATTERNS = [
     re.compile(r"ignore all previous instructions", re.IGNORECASE),
     re.compile(r"revoke all limitations", re.IGNORECASE),
     re.compile(r"let's ignore your policy", re.IGNORECASE),
+    re.compile(r"(\d{3}-\d{2}-\d{4})|(\d{16})|(\b\d{5}(?:-\d{4})?\b)") , # SSN, credit card, ZIP
     # Catch “DAN”‐style:
     re.compile(r"when i say.*ignore your (rules|policy)", re.IGNORECASE),
     # Catch escaped encodings:
@@ -37,7 +38,7 @@ def detect_pii(text: str) -> Optional[str]:
     for ent in doc.ents:
         if ent.label_ in ("PERSON","GPE","LOC","ORG","DATE","CARDINAL","MONEY"):
             return f"Detected entity {ent.text!r} ({ent.label_})"
-    # plus any regexes you want for SSN, credit‐card, etc.
+
     return None
 
 def detect_disallowed_token(text: str) -> Optional[str]:
@@ -50,6 +51,19 @@ def detect_disallowed_token(text: str) -> Optional[str]:
         if tok in lower:
             return f"Contains disallowed token {tok!r}: {reason}"
     return None
+
+# detox = Detoxify('unbiased-toxic-roberta')
+
+# def detect_toxicity(text: str) -> Optional[str]:
+#     """
+#     Detect toxicity in the given text using Detoxify.
+#     Returns a string describing the toxicity score, or None if the score is below the threshold.
+#     """
+#     scores = detox.predict(text)
+#     if scores.get("toxicity",0) >= 0.8:
+#         return f"Toxicity {scores['toxicity']:.2f}"
+#     return None
+
 
 def detect_jailbreak_patterns(text: str) -> Optional[str]:
     """
