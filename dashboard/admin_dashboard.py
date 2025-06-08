@@ -55,7 +55,7 @@ def main():
     st.title("🔐 Model Inference Firewall: Admin Dashboard")
     st.markdown("This dashboard provides an overview of the Model Inference Firewall (MIF) logs.")
 
-    # 3a. Load & optionally filter by date range
+    # Load & optionally filter by date range
     df = load_logs(LOG_PATH)
 
     st.sidebar.header("Date Range Filter")
@@ -67,14 +67,14 @@ def main():
     mask = (df["timestamp"].dt.date >= start_date) & (df["timestamp"].dt.date <= end_date)
     filtered_df = df.loc[mask] #create a filtered DataFrame
 
-    # 3b. Compute key metrics
+    # Compute key metrics
     total_requests  = len(filtered_df)
     threats_blocked = filtered_df["is_blocked"].sum()
 
     # We haven’t yet captured tokens in the log, so for now just show “N/A” or prompt how to add it.
     total_tokens = "N/A"
 
-    # 3c. Token usage per user: placeholder until you log tokens in your proxy
+    # Token usage per user: placeholder until you log tokens in your proxy
     st.subheader("Key Metrics")
     col1, col2, col3 = st.columns(3)
     col1.metric("Total Requests", f"{total_requests:,}")
@@ -83,7 +83,7 @@ def main():
 
     st.markdown("---")
 
-    # 3d. Show “requests per user” (blocked vs. allowed) as a table
+    # Show “requests per user” (blocked vs. allowed) as a table
     st.subheader("Requests by User (IP address)")
 
     # Group by user_id and compute counts
@@ -106,9 +106,6 @@ def main():
     top_users = summary.head(top_n).set_index("user_id")
     st.subheader(f"Top {top_n} Users by Request Count")
     st.bar_chart(top_users["total_requests"])
-
-
-
 
 
 if __name__ == "__main__":
