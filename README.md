@@ -10,7 +10,6 @@ A lightweight FastAPI service that sits between end users and LLM APIs to detect
 - 📊 Logging to console and a rotating log file (`logs/mif-firewall.log`) for audit and analysis  
 - 🚀 Built with FastAPI + HTTPX for asynchronous forwarding  
 - 🔧 Easily extendable with dashboards, user authentication, Docker support, etc.
-
 ---
 
 ## 🧪 Example Workflow
@@ -87,7 +86,7 @@ mif-firewall/
 │   └── proxy.py           # Async logic to forward allowed requests to LLM endpoint
 ├── tests/
 │   └── test_requests.py   # pytest suite: allowed/blocked/rate-limit workflows
-├── logs/                  # Automatically created at runtime; contains mif-firewall.log
+├── logs/                  # Automatically created at runtime; contains       mif-firewall.log
 ├── requirements.txt       # Python dependencies (FastAPI, HTTPX, pytest, etc.)
 └── README.md              # This file
 ```
@@ -119,6 +118,23 @@ mif-firewall/
   - Allowed requests get a 200 with dummy response
   - Blocked prompts (matching forbidden patterns) return 403
   - Hitting the rate limit returns 429, and after the time window, requests succeed again
+
+6. dashboard/admin_dashboard
+  - Configured (LOG_PATH)
+  We point at logs/mif-firewall.log (this is where your existing logger.py writes).
+
+  - use a simple regular expression to pull out timestamp, log‐level (INFO vs. WARNING) and IP.
+  - build a Pandas DataFrame with columns:
+    * timestamp (as a datetime),
+    * user_id (we treat the IP as the “user”),
+    * is_blocked (True if level==WARNING, False otherwise),
+    * tokens_used (set to None for now—see).
+  - Streamlit layout
+  - Sidebar date filter: lets you pick a date range.
+  - KPI cards: “Total Requests” + “Threats Blocked” + a placeholder for “Total Tokens Used.”
+  - Requests by user table: groups by user_id (IP) and shows how many total requests and how many of those were blocked.
+  - Bar chart: a quick visualization of the top N users by request count.
+
 
 ## Installation
 
@@ -181,14 +197,17 @@ pytest -q
 If any test fails, you’ll see which assertion or import caused the error.
 Make sure app/__init__.py exists so that pytest can resolve from app.main import.
 
+## Running the Dashboard
+cd dashboard
+streamlit run admin_dashboard.py
+
 ### Future Ideas
 
   - 📈 Persistent Rate Limiter
     Swap the in-memory timestamp store for Redis or a database so multiple Uvicorn workers share the same counters.
   - 🔗 JWT/API-Key Authentication
     Require each client to present a valid JWT or API key; rate-limit per key instead of per IP.
-  - 🎛️ Admin Dashboard
-    Build a simple Streamlit or React dashboard to show live logs, blocked request counts, trending fuzzy patterns, etc.
+
   - 🔔 Webhook Alerts
     Send a Slack or email notification whenever a high-severity threat is detected.
   - 🛠️ Plugin-Based Filtering
