@@ -45,10 +45,11 @@ async def forward_to_model(
     clean_headers["Content-Type"] = "application/json"
 
     modified_payload = payload.copy()
-    if "model" not in modified_payload:
-        modified_payload["model"] = "accounts/fireworks/models/deepseek-r1-0528"
+    modified_payload["model"] = os.getenv(
+        "MODEL_ID", "accounts/fireworks/models/deepseek-r1"
+    )
 
-    # Transform simple inputs format to chat completions format if needed
+    # Transform simple inputs format to chat completions format 
     if "inputs" in modified_payload and "messages" not in modified_payload:
         user_input = modified_payload.pop("inputs")
         modified_payload["messages"] = [

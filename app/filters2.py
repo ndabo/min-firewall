@@ -52,17 +52,7 @@ def detect_disallowed_token(text: str) -> Optional[str]:
             return f"Contains disallowed token {tok!r}: {reason}"
     return None
 
-# detox = Detoxify('unbiased-toxic-roberta')
 
-# def detect_toxicity(text: str) -> Optional[str]:
-#     """
-#     Detect toxicity in the given text using Detoxify.
-#     Returns a string describing the toxicity score, or None if the score is below the threshold.
-#     """
-#     scores = detox.predict(text)
-#     if scores.get("toxicity",0) >= 0.8:
-#         return f"Toxicity {scores['toxicity']:.2f}"
-#     return None
 
 
 def detect_jailbreak_patterns(text: str) -> Optional[str]:
@@ -91,6 +81,7 @@ def is_blocked(prompt: str) -> Tuple[bool, Optional[str]]:
 
     # Check for disallowed tokens
     token_reason = detect_disallowed_token(prompt)
+
     if token_reason:
         return True, token_reason
 
@@ -100,3 +91,4 @@ def is_blocked(prompt: str) -> Tuple[bool, Optional[str]]:
         return True, jailbreak_reason
 
     return False, None
+

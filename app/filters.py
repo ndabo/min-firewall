@@ -17,6 +17,7 @@ FORBIDDEN_WORDS = [
     "override",
     "disable",
     "shutdown",
+    "ignore",
 ]
 
 FORBIDDEN_PATTERNS = {

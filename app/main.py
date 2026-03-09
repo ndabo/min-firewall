@@ -1,17 +1,17 @@
 """
 FastAPI application for managing firewall rules.
 """
+from dotenv import load_dotenv
+load_dotenv(override=True)
+
 from typing import Dict, List
 import time
-from dotenv import load_dotenv
 from fastapi import FastAPI, Request, HTTPException, status
 from fastapi.responses import JSONResponse
-from app.filters import is_blocked
+from app.filters3 import is_blocked
 
 import app.proxy as proxy_module
 from app.logger import get_logger
-
-load_dotenv()
 
 
 app = FastAPI(title = "Model Inference Firewall (MIF)")
@@ -73,9 +73,10 @@ async def proxy_to_hf(request: Request):
         prompt_txt = " ".join(item.get("content","") for item in prompt)
     elif isinstance(prompt,str):
         prompt_txt = prompt
-    else: 
+    else :
         prompt_txt = ""
     
+
     # --- Rate limiting ---
     if is_rate_limited(client_ip):
         logger.warning("Rate limit exceeded for IP %s.", client_ip)
@@ -85,7 +86,7 @@ async def proxy_to_hf(request: Request):
         )
 
      # --- Prompt filtering ---
-    blocked, reason = is_blocked(prompt_txt)
+    blocked, reason = await is_blocked(prompt_txt)
     if blocked:
         logger.warning(
             "Blocked request from IP %s: %s -- Prompt: %r",
@@ -103,11 +104,11 @@ async def proxy_to_hf(request: Request):
     try:
         model_response = await proxy_module.forward_to_model(body, dict(request.headers))
     except HTTPException as e:
-        # Already logged/constructed by forward_to_model
-        raise e
+        # Already logged/constructed by forward_to_model 
+        raise e 
 
     # --- Return the model’s JSON straight back to the client ---
-    return JSONResponse(content=model_response, status_code=200)
+    return JSONResponse(content=model_response, status_code=200) 
 
 
     

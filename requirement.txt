@@ -1,15 +1,10 @@
-
----
-
-##  `requirements.txt`
-
-```txt
 fastapi
 uvicorn
 requests
 python-dotenv
 httpx
 pytest
+pytest-asyncio
 streamlit
 pandas
-
+spacy
